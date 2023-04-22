@@ -1,11 +1,13 @@
 package com.plcoding
 
+import com.plcoding.data.remote.service.OneSignalServiceImpl
 import io.ktor.application.*
 import com.plcoding.plugins.*
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
+import io.ktor.client.features.logging.*
 
 fun main(args: Array<String>): Unit =
     io.ktor.server.netty.EngineMain.main(args)
@@ -16,8 +18,16 @@ fun Application.module() {
         install(JsonFeature) {
             serializer = KotlinxSerializer()
         }
+
+        install(Logging) {
+            level = LogLevel.ALL
+        }
     }
 
+    val apiKey = System.getenv()["api_key"] ?: throw IllegalArgumentException("apiKey empty")
 
-    configureRouting()
+
+    val service = OneSignalServiceImpl(client = client, apiKey = apiKey)
+
+    configureRouting(service)
 }
